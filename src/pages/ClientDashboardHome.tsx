@@ -38,6 +38,7 @@ import {
 } from "@tanstack/react-table"
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
+
 const data: Payment[] = [
     {
         id: "m5gr84i9",
@@ -162,8 +163,9 @@ export const columns: ColumnDef<Payment>[] = [
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuGroup>
-                            <DropdownMenuItem>View customer</DropdownMenuItem>
-                            <DropdownMenuItem>View payment details</DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <a href="/users/orders">View Order</a>
+                            </DropdownMenuItem>
                         </DropdownMenuGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -207,12 +209,14 @@ export default function ClientDashboardHome() {
 
 
     return <>
-        <div>
-            <h1 className="text-5xl font-medium m-10">Welcome to Dashboard</h1>
+
+        <div className="m-10 capitalize">
+            <h1 className="text-5xl font-medium ">Welcome to Swift Track System</h1>
+            <p>make your orders on your own , easy and fast</p>
             <Separator />
         </div>
 
-        <div className="w-[90%] m-10 mt-0">
+        <div className="w-[90%] m-10 mt-0npx shadcn@latest add drawer">
             <div className="flex items-center py-4">
                 <Input
                     placeholder="Filter emails..."

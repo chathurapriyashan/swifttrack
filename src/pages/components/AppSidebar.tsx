@@ -48,7 +48,9 @@ export default function AppSidebar() {
           {/* <SidebarGroupLabel>Order Management</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
+              <a href="/users/orders/new">
                 <Button variant="default" className="m-3">Create new Order +</Button>
+              </a>
 
             </SidebarMenu>
           </SidebarGroupContent>

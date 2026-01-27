@@ -9,7 +9,16 @@ import tailwindcss from "@tailwindcss/vite"
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        
+      }
+    }),
     tailwindcss(),
 
   ],
