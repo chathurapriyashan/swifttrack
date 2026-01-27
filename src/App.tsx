@@ -9,7 +9,8 @@ import OrderDetails from './pages/OrderDetails';
 import CreateOrderFrom from './pages/OrderCreateFrom';
 import WareHouseDashboard from './pages/WareHouseDashboard';
 import OrderUpdate from './pages/OrderUpdate';
-
+import Drivers from './pages/Drivers';
+import DriverApp from './pages/components/DriverApp';
 
 
 function App() {
@@ -23,7 +24,9 @@ function App() {
         <Route path='/users/orders' element={<OrderDetails />} />
         <Route path="/users/orders/new" element={<CreateOrderFrom />} />
         <Route path="/warehouse" element={< WareHouseDashboard />} />
-        <Route path="/orders/update" element={<OrderUpdate/>} />
+        <Route path="/warehouse/orders/update" element={<OrderUpdate/>} />
+        <Route path="/warehouse/drivers" element={<Drivers/>} />
+        <Route path="/drivers" element={<DriverApp/>} />
       </Routes>
     </BrowserRouter>
   );

@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 const items = [
   {
     title: "Home",
-    url: "/users",
+    url: "/warehouse",
     icon: Home,
   },
   {
@@ -30,8 +30,6 @@ const items = [
     url: "/packages",
     icon: Package,
   }, 
-
-
 ]
 
 export default function WareHouseSidebar() {
