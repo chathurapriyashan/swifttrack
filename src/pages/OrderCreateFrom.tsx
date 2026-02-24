@@ -17,6 +17,32 @@ export interface SelectedProduct extends Product {
   quantity: number;
 }
 
+
+async function createOrder(selectedProducts , orderName , deliveryAddress , total ) {
+    console.log('order created');
+    console.log(selectedProducts , orderName , deliveryAddress , total);
+
+    const response = await fetch("http://localhost:8000/api/orders" , {
+      method:"POST" , 
+      body : JSON.stringify({
+          order_id : 0 ,
+          client_id : 0 , 
+          status:"CREATED",
+          product: selectedProducts,
+          client_name :orderName , 
+          total : total,
+      })
+    })
+
+    if(response.ok){
+      const data = await response.json();
+      if(data.status == "success"){
+        alert("order created");
+      }
+    }else{
+      alert("oder not created");
+    }
+}
 // Mock product database
 const availableProducts: Product[] = [
   { id: 1, name: 'Organic Avocados', price: 12.99, category: 'Produce' },
@@ -46,6 +72,11 @@ export default function CreateOrderFrom() {
     zip: ''
   });
   const [showSearch, setShowSearch] = useState(false);
+
+  // console.log(selectedProducts , orderName , deliveryAddress , showSearch);
+
+
+
 
   const addProduct = (product: Product) => {
     const existing = selectedProducts.find(p => p.id === product.id);
@@ -167,6 +198,7 @@ export default function CreateOrderFrom() {
           {/* Submit Button */}
           <div className="border-t border-black pt-8">
             <button
+              onClick={()=>createOrder(selectedProducts , orderName , deliveryAddress , total)}
               type="submit"
               disabled={selectedProducts.length === 0}
               className="w-full bg-black text-white py-4 uppercase tracking-wider hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"

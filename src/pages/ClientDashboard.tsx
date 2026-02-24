@@ -6,10 +6,10 @@ import ClientDashboardHome from "./ClientDashboardHome"
 
 
 
-export default function ClientDashboard({ children }: { children: React.ReactNode }){
+export default function ClientDashboard({ children , user }: { children: React.ReactNode }){
     return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar user={user} />
       <main className="flex flex-col w-full">
         <ClientDashboardHome />
         {children}

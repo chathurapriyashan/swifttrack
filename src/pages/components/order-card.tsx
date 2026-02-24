@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MapPin, Phone, Package, DollarSign, Clock, ChevronDown, ChevronUp, Navigation, CheckCircle2, Camera } from 'lucide-react';
-import type { Order } from '../App';
+import type { Order } from './DriverApp';
 
 interface OrderCardProps {
   order: Order;

@@ -1,4 +1,15 @@
 import {  Home, History, ListOrdered } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 import {
   Sidebar,
@@ -21,27 +32,26 @@ const items = [
     url: "/users",
     icon: Home,
   },
-  {
-    title: "Orders",
-    url: "#",
-    icon: ListOrdered
-  },
-  {
-    title: "History",
-    url: "/history",
-    icon: History,
-  },
-
-
 ]
 
-export default function AppSidebar() {
+export default function AppSidebar({user}) {
+
+  const onSignOut = ()=>{
+    localStorage.clear();
+    window.location.reload();
+  }
+
+
+
+
+
   return (
     <Sidebar>
       <SidebarContent>
         <Avatar className="m-4 w-10 h-10">
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>Avatar</AvatarFallback>
+          <AvatarImage src={user.image} />
+          <p>user.email</p>
+          <AvatarFallback>user.name</AvatarFallback>
         </Avatar>
 
         <SidebarGroup>
@@ -77,6 +87,32 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" >Signout</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your account
+                    from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={onSignOut}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+              
+          </SidebarGroupContent>
+        </SidebarGroup>
+
       </SidebarContent>
     </Sidebar>
   )
