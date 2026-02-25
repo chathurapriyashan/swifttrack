@@ -10,6 +10,7 @@ import CreateOrderFrom from './pages/OrderCreateFrom';
 import WareHouseDashboard from './pages/WareHouseDashboard';
 import OrderUpdate from './pages/OrderUpdate';
 import Drivers from './pages/Drivers';
+import AdminPanel from './pages/AdminPanel';
 import DriverApp from './pages/components/DriverApp';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -96,6 +97,7 @@ function App() {
         <Route path="/warehouse/orders/update" element={<ProtectedRoute element={<OrderUpdate user={user} handleLogout={handleLogout} />} />} />
         <Route path="/warehouse/drivers" element={<ProtectedRoute element={<Drivers user={user} handleLogout={handleLogout} />} />} />
         <Route path="/drivers" element={<ProtectedRoute element={<DriverApp user={user} handleLogout={handleLogout} />} />} />
+        <Route path="/admin" element={<ProtectedRoute element={<AdminPanel />} />} />
       </Routes>
     </BrowserRouter>
   );
