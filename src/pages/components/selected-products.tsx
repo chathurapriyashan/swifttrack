@@ -44,7 +44,7 @@ export function SelectedProducts({ products, onUpdateQuantity, onRemove }: Selec
 
           {/* Price */}
           <div className="w-24 text-right text-sm">
-            ${(product.price * product.quantity).toFixed(2)}
+            Rs. {(product.price * product.quantity).toFixed(2)}
           </div>
 
           {/* Remove Button */}

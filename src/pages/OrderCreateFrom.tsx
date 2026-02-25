@@ -1,16 +1,55 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { OrderCreateHeader } from './components/order-create-header';
 import { ProductSearch } from './components/product-search';
 import { SelectedProducts } from './components/selected-products';
 import { DeliveryForm } from './components/delivery-form';
 import { OrderSummary } from './components/order-summary';
 import { Plus } from 'lucide-react';
+import { Bounce, ToastContainer, toast } from 'react-toastify';
+
 
 export interface Product {
   id: number;
   name: string;
-  price: number;
+  sku: string;
   category: string;
+  price: number;
+  quantity: number;
+  supplier: string;
+  status: 'active' | 'inactive' | 'discontinued';
+  dateAdded: string;
+}
+
+const initialProducts: Product[] = [
+  {
+    id: 1,
+    name: 'Apple',
+    sku: 'APL-001',
+    category: 'Fruits',
+    price: 0.5,
+    quantity: 100,
+    supplier: 'Fresh Farms',
+    status: 'active',
+    dateAdded: '2024-01-15'}
+];
+
+
+
+async function loadInitialProducts(){
+    try{
+
+        const user = await fetch("http://10.23.1.254:3000/api/products");
+        if(user.ok){
+            const data = await user.json();
+            console.log(data)
+            return data as Product[];
+        }else{
+            throw new Error("Failed to fetch products: " + user.statusText);
+        }               
+    }catch(error){
+        console.error("Error fetching products:", error);
+        return [];
+    }
 }
 
 export interface SelectedProduct extends Product {
@@ -18,51 +57,11 @@ export interface SelectedProduct extends Product {
 }
 
 
-async function createOrder(selectedProducts , orderName , deliveryAddress , total ) {
-    console.log('order created');
-    console.log(selectedProducts , orderName , deliveryAddress , total);
 
-    const response = await fetch("http://localhost:8000/api/orders" , {
-      method:"POST" , 
-      body : JSON.stringify({
-          order_id : 0 ,
-          client_id : 0 , 
-          status:"CREATED",
-          product: selectedProducts,
-          client_name :orderName , 
-          total : total,
-      })
-    })
-
-    if(response.ok){
-      const data = await response.json();
-      if(data.status == "success"){
-        alert("order created");
-      }
-    }else{
-      alert("oder not created");
-    }
-}
 // Mock product database
-const availableProducts: Product[] = [
-  { id: 1, name: 'Organic Avocados', price: 12.99, category: 'Produce' },
-  { id: 2, name: 'Sourdough Bread', price: 8.50, category: 'Bakery' },
-  { id: 3, name: 'Free Range Eggs (Dozen)', price: 6.99, category: 'Dairy' },
-  { id: 4, name: 'Almond Milk', price: 5.33, category: 'Dairy' },
-  { id: 5, name: 'Fresh Spinach', price: 3.99, category: 'Produce' },
-  { id: 6, name: 'Greek Yogurt', price: 4.99, category: 'Dairy' },
-  { id: 7, name: 'Whole Grain Pasta', price: 3.49, category: 'Pantry' },
-  { id: 8, name: 'Olive Oil', price: 14.99, category: 'Pantry' },
-  { id: 9, name: 'Cherry Tomatoes', price: 4.49, category: 'Produce' },
-  { id: 10, name: 'Fresh Mozzarella', price: 6.99, category: 'Dairy' },
-  { id: 11, name: 'Organic Chicken Breast', price: 12.99, category: 'Meat' },
-  { id: 12, name: 'Wild Salmon Fillet', price: 18.99, category: 'Seafood' },
-  { id: 13, name: 'Quinoa', price: 7.99, category: 'Pantry' },
-  { id: 14, name: 'Kale', price: 3.49, category: 'Produce' },
-  { id: 15, name: 'Blueberries', price: 5.99, category: 'Produce' },
-];
-
+  
 export default function CreateOrderFrom() {
+  const [availableProducts, setAvailableProducts] = useState<Product[]>(initialProducts);
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [orderName, setOrderName] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState({
@@ -75,6 +74,51 @@ export default function CreateOrderFrom() {
 
   // console.log(selectedProducts , orderName , deliveryAddress , showSearch);
 
+
+  async function createOrder(selectedProducts , orderName , deliveryAddress , total ) {
+
+    const response = await fetch("http://10.23.1.254:3000/api/orders/new" , {
+      method:"POST" , 
+      headers:{
+        "Content-Type" : "application/json",
+      },
+      body : JSON.stringify({
+          client_id : 1 , 
+          products: selectedProducts.map(product=>({id: product.id , quantity: product.quantity})),
+          client_name : orderName , 
+          delivery_address : `${deliveryAddress.street} , ${deliveryAddress.city} , ${deliveryAddress.state} , ${deliveryAddress.zip}`,
+      })
+    })
+
+    if(response.ok){
+      const data = await response.json();
+      if(data.status == "success"){
+        alert("Order created successfully!");
+        toast.success('🦄 Wow so easy!', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Bounce,
+            });
+        setOrderName('');
+        setDeliveryAddress({
+          street: '',
+          city: '',
+          state: '',
+          zip: ''
+        });
+        setSelectedProducts([]);
+      }
+    }else{
+      alert("Failed to create order!");
+      toast.error("Failed to create order!");
+    }
+}
 
 
 
@@ -111,14 +155,27 @@ export default function CreateOrderFrom() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Order submitted:', {
-      orderName,
-      deliveryAddress,
-      selectedProducts,
-      total
-    });
-    alert('Order created successfully!');
+
+    // createOrder(selectedProducts , orderName , deliveryAddress , total).then(()=>{
+    //   setOrderName('');
+    //   setDeliveryAddress({
+    //     street: '',
+    //     city: '',
+    //     state: '',
+    //     zip: ''
+    //   });
+    //   setSelectedProducts([]);
+    // })
   };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const products = await loadInitialProducts();
+      setAvailableProducts(products);
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">

@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/pages/components/ui/
 import AdminUsers from './components/admin-users';
 import AdminWarehouses from './components/admin-warehouses';
 import AdminOrders from './components/admin-orders';
+import AdminProducts from './components/admin-products';
 import AdminSidebar from './components/AdminSidebar';
 
 export default function AdminPanel() {
@@ -18,7 +19,7 @@ export default function AdminPanel() {
             {/* Header */}
             <div className="mb-8">
               <h1 className="text-4xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage users, warehouses, and track all orders</p>
+              <p className="text-gray-600">Manage users, warehouses, products, and track all orders</p>
             </div>
 
             {/* Tabs */}
@@ -27,9 +28,10 @@ export default function AdminPanel() {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="users">Users</TabsTrigger>
                 <TabsTrigger value="warehouses">Warehouses</TabsTrigger>
+                <TabsTrigger value="products">Products</TabsTrigger>
                 <TabsTrigger value="orders">Orders</TabsTrigger>
               </TabsList>
 
@@ -39,6 +41,10 @@ export default function AdminPanel() {
 
               <TabsContent value="warehouses" className="mt-6">
                 <AdminWarehouses />
+              </TabsContent>
+
+              <TabsContent value="products" className="mt-6">
+                <AdminProducts />
               </TabsContent>
 
               <TabsContent value="orders" className="mt-6">

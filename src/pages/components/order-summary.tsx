@@ -18,19 +18,19 @@ export function OrderSummary({ subtotal, tax, deliveryFee, total }: OrderSummary
       <div className="max-w-md ml-auto space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Subtotal</span>
-          <span>${subtotal.toFixed(2)}</span>
+          <span>Rs. {subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Tax (8%)</span>
-          <span>${tax.toFixed(2)}</span>
+          <span>Rs. {tax.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Delivery Fee</span>
-          <span>${deliveryFee.toFixed(2)}</span>
+          <span>Rs. {deliveryFee.toFixed(2)}</span>
         </div>
         <div className="border-t border-black pt-3 flex justify-between">
           <span className="uppercase tracking-wider">Total</span>
-          <span className="text-xl">${total.toFixed(2)}</span>
+          <span className="text-xl">Rs. {total.toFixed(2)}</span>
         </div>
       </div>
     </div>

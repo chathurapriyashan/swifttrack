@@ -12,8 +12,7 @@ export function ProductSearch({ products, onSelect, selectedProductIds }: Produc
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+    product.name?.toLowerCase().includes(searchTerm.toLowerCase()) 
   );
 
   return (
@@ -57,7 +56,7 @@ export function ProductSearch({ products, onSelect, selectedProductIds }: Produc
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">{product.category}</p>
                       </div>
-                      <p className="text-sm">${product.price.toFixed(2)}</p>
+                      <p className="text-sm">Rs. {product.price}</p>
                     </div>
                   </button>
                 );

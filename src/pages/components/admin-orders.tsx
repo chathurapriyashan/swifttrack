@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/pages/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,90 +8,68 @@ import { Eye, Search, Filter, TrendingUp, Clock, CheckCircle, AlertCircle } from
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/pages/components/ui/dialog';
 
 export interface Order {
-  id: string;
-  clientName: string;
-  orderDate: string;
-  deliveryDate: string;
-  items: number;
-  totalAmount: number;
+  order_id: number;
+  client_id: number;
+  client_name: string;
+  delivery_address: string;
+//   deliveryDate: string;
+//   items: number;
+//   totalAmount: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  destination: string;
-  warehouse: string;
-  driver?: string;
+//   destination: string;
+//   warehouse: string;
+//   driver?: string;
 }
 
-const initialOrders: Order[] = [
-  {
-    id: 'ORD-001',
-    clientName: 'ABC Corp',
-    orderDate: '2024-02-20',
-    deliveryDate: '2024-02-25',
-    items: 5,
-    totalAmount: 1250.00,
-    status: 'delivered',
-    destination: 'New York',
-    warehouse: 'Downtown Warehouse',
-    driver: 'Michael Chen',
-  },
-  {
-    id: 'ORD-002',
-    clientName: 'XYZ Ltd',
-    orderDate: '2024-02-21',
-    deliveryDate: '2024-02-26',
-    items: 3,
-    totalAmount: 750.50,
-    status: 'shipped',
-    destination: 'Los Angeles',
-    warehouse: 'West Side Hub',
-    driver: 'Sarah Johnson',
-  },
-  {
-    id: 'ORD-003',
-    clientName: 'Tech Startup',
-    orderDate: '2024-02-22',
-    deliveryDate: '2024-02-27',
-    items: 8,
-    totalAmount: 2100.00,
-    status: 'processing',
-    destination: 'Chicago',
-    warehouse: 'Central Storage',
-  },
-  {
-    id: 'ORD-004',
-    clientName: 'Global Trade Inc',
-    orderDate: '2024-02-23',
-    deliveryDate: '2024-02-28',
-    items: 2,
-    totalAmount: 500.00,
-    status: 'pending',
-    destination: 'Houston',
-    warehouse: 'Downtown Warehouse',
-  },
-  {
-    id: 'ORD-005',
-    clientName: 'Local Retail',
-    orderDate: '2024-02-15',
-    deliveryDate: '2024-02-20',
-    items: 4,
-    totalAmount: 1800.00,
-    status: 'cancelled',
-    destination: 'Miami',
-    warehouse: 'West Side Hub',
-  },
-];
+
+
+async function loadInitialOrders(){
+    try{
+
+        const user = await fetch("http://10.23.1.254:3000/api/orders");
+        if(user.ok){
+            const data = await user.json();
+            console.log(data)
+            return data as Order[];
+        }else{
+            throw new Error("Failed to fetch orders: " + user.statusText);
+        }               
+    }catch(error){
+        console.error("Error fetching orders:", error);
+        return [];
+    }
+}
+
+
+
+
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
-  const filteredOrders = orders.filter(order => {
+
+
+
+    useEffect(() => {
+        loadInitialOrders().then(data => {
+            setOrders(data);
+        });
+    }, [])
+
+
+
+
+
+
+  const filteredOrders = orders?.filter(order => {
     const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.destination.toLowerCase().includes(searchTerm.toLowerCase());
+      order.order_id === parseInt(searchTerm) ||
+      order.client_name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      order.delivery_address?.toLowerCase()?.includes(searchTerm.toLowerCase());
     
     const matchesStatus = !statusFilter || order.status === statusFilter;
     
@@ -139,13 +117,13 @@ export default function AdminOrders() {
 
   // Calculate stats
   const stats = {
-    total: orders.length,
-    pending: orders.filter(o => o.status === 'pending').length,
-    processing: orders.filter(o => o.status === 'processing').length,
-    shipped: orders.filter(o => o.status === 'shipped').length,
-    delivered: orders.filter(o => o.status === 'delivered').length,
-    cancelled: orders.filter(o => o.status === 'cancelled').length,
-    totalRevenue: orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + o.totalAmount, 0),
+    total: orders?.length,
+    pending: orders?.filter(o => o.status === 'pending').length,
+    processing: orders?.filter(o => o.status === 'processing').length,
+    shipped: orders?.filter(o => o.status === 'shipped').length,
+    delivered: orders?.filter(o => o.status === 'delivered').length,
+    cancelled: orders?.filter(o => o.status === 'cancelled').length,
+    // totalRevenue: orders?.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + (o?.totalAmount || 0), 0),
   };
 
   return (
@@ -205,7 +183,7 @@ export default function AdminOrders() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-700">${stats.totalRevenue.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-green-700">${stats?.totalRevenue?.toFixed(2) || 0}</div>
               <p className="text-sm text-gray-600">Revenue</p>
             </div>
           </CardContent>
@@ -284,23 +262,23 @@ export default function AdminOrders() {
                 <TableRow>
                   <TableHead>Order ID</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Items</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Order Date</TableHead>
-                  <TableHead>Delivery Date</TableHead>
+                  {/* <TableHead>Items</TableHead> */}
+                  {/* <TableHead>Amount</TableHead> */}
+                  {/* <TableHead>Order Date</TableHead> */}
+                  {/* <TableHead>Delivery Date</TableHead> */}
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-left">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOrders.map(order => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.clientName}</TableCell>
-                    <TableCell>{order.items}</TableCell>
-                    <TableCell>${order.totalAmount.toFixed(2)}</TableCell>
-                    <TableCell>{order.orderDate}</TableCell>
-                    <TableCell>{order.deliveryDate}</TableCell>
+                {filteredOrders?.map(order => (
+                  <TableRow key={order.order_id}>
+                    <TableCell className="font-medium">{order.order_id}</TableCell>
+                    <TableCell>{order.client_name}</TableCell>
+                    {/* <TableCell>{order.items}</TableCell>
+                    <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+                    <TableCell>{order.order_date}</TableCell>
+                    <TableCell>{order.delivery_date}</TableCell> */}
                     <TableCell>
                       <Badge className={getStatusColor(order.status)} variant="outline">
                         <span className="flex items-center gap-1">
