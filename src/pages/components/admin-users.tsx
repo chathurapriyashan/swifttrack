@@ -66,8 +66,9 @@ async function loadInitialUsers(){
         const user = await fetch("http://10.23.1.254:3000/api/users");
         if(user.ok){
             const data = await user.json();
-            console.log(data)
-            return data as User[];
+            if(data && data.clients){
+              return data.clients as User[];
+            }else return [];
         }else{
             throw new Error("Failed to fetch users: " + user.statusText);
         }               
@@ -92,6 +93,8 @@ export default function AdminUsers() {
     status: 'active',
     joinDate: new Date().toISOString().split('T')[0],
   });
+
+  console.log("Current users state:", users);
 
   const filteredUsers = users?.filter(user =>
     user?.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||

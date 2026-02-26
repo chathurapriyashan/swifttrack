@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DriverHeader } from './driver-header';
 import { DailyRoute } from './daily-route';
 import { RouteOverview } from './route-overview';
@@ -88,6 +88,25 @@ const initialOrders: Order[] = [
 
 
 
+async function loadOrdersByDriverId(driverId) {
+  try {
+    const response = await fetch(`http://10.23.1.254:3000/api/orders`);
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Fetched orders data:", data);
+      return data.filter(order => order.driver_id === driverId)  as Order[];
+  
+    } else {
+      throw new Error("Failed to fetch orders: " + response.statusText);
+    }
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    return [];
+  }
+}
+
+
+
 export default function DriverApp() {
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [capturingSignature, setCapturingSignature] = useState<string | null>(null);
@@ -148,6 +167,18 @@ export default function DriverApp() {
       window.open(url, '_blank');
     }
   };
+
+
+  useEffect(() => {
+    // Simulate loading orders for a specific driver (e.g., driverId = '123')
+    loadOrdersByDriverId(1).then(loadedOrders => {
+      console.log("Loaded orders for driver:", loadedOrders);
+      setOrders(loadedOrders);
+    });
+  }, []);
+
+
+
   return (
     <div className="min-h-screen bg-white pb-6">
       {/* Mobile optimized max-width */}

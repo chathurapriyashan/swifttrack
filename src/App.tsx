@@ -84,21 +84,21 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LoginPage setUser={setUser} user={user} />} />
-        <Route path="/login" element={<LoginPage setUser={setUser} user={user} />} />
-        <Route path="/signup" element={<SignupPage setUser={setUser} user={user} />} />
-        
-        {/* Protected Routes */}
-        <Route path="/users" element={<ProtectedRoute element={<ClientDashboard user={user} handleLogout={handleLogout} />} />} />
-        <Route path='/users/orders' element={<ProtectedRoute element={<OrderDetails user={user} handleLogout={handleLogout} />} />} />
-        <Route path="/users/orders/new" element={<ProtectedRoute element={<CreateOrderFrom user={user} handleLogout={handleLogout} />} />} />
-        <Route path="/warehouse" element={<ProtectedRoute element={< WareHouseDashboard user={user} handleLogout={handleLogout} />} />} />
-        <Route path="/warehouse/orders/update" element={<ProtectedRoute element={<OrderUpdate user={user} handleLogout={handleLogout} />} />} />
-        <Route path="/warehouse/drivers" element={<ProtectedRoute element={<Drivers user={user} handleLogout={handleLogout} />} />} />
-        <Route path="/drivers" element={<ProtectedRoute element={<DriverApp user={user} handleLogout={handleLogout} />} />} />
-        <Route path="/admin" element={<ProtectedRoute element={<AdminPanel />} />} />
-      </Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LoginPage setUser={setUser} user={user} />} />
+          <Route path="/login" element={<LoginPage setUser={setUser} user={user} />} />
+          <Route path="/signup" element={<SignupPage setUser={setUser} user={user} />} />
+          
+          {/* Protected Routes */}
+          <Route path="/users" element={<ProtectedRoute element={<ClientDashboard user={user} handleLogout={handleLogout} />} />} />
+          <Route path='/users/orders' element={<ProtectedRoute element={<OrderDetails user={user} handleLogout={handleLogout} />} />} />
+          <Route path="/users/orders/new" element={<ProtectedRoute element={<CreateOrderFrom user={user} handleLogout={handleLogout} />} />} />
+          <Route path="/warehouse" element={<ProtectedRoute element={< WareHouseDashboard user={user} handleLogout={handleLogout} />} />} />
+          <Route path="/warehouse/orders/update" element={<ProtectedRoute element={<OrderUpdate user={user} handleLogout={handleLogout} />} />} />
+          <Route path="/warehouse/drivers" element={<ProtectedRoute element={<Drivers user={user} handleLogout={handleLogout} />} />} />
+          <Route path="/drivers" element={<ProtectedRoute element={<DriverApp user={user} handleLogout={handleLogout} />} />} />
+          <Route path="/admin" element={<ProtectedRoute element={<AdminPanel />} />} />
+        </Routes>
     </BrowserRouter>
   );
 }

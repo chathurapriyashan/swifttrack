@@ -39,47 +39,119 @@ import {
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 
-const data: Payment[] = [
-    {
-        id: "m5gr84i9",
-        amount: 316,
-        status: "success",
-        email: "ken99@example.com",
-    },
-    {
-        id: "3u1reuv4",
-        amount: 242,
-        status: "success",
-        email: "Abe45@example.com",
-    },
-    {
-        id: "derv1ws0",
-        amount: 837,
-        status: "processing",
-        email: "Monserrat44@example.com",
-    },
-    {
-        id: "5kma53ae",
-        amount: 874,
-        status: "success",
-        email: "Silas22@example.com",
-    },
-    {
-        id: "bhqecj4p",
-        amount: 721,
-        status: "failed",
-        email: "carmella@example.com",
-    },
-]
 
-export type Payment = {
-    id: string
-    amount: number
-    status: "pending" | "processing" | "success" | "failed"
-    email: string
+export interface Order {
+  order_id: number;
+  client_id: number;
+  client_name: string;
+  delivery_address: string;
+//   deliveryDate: string;
+//   items: number;
+//   totalAmount: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+//   destination: string;
+//   warehouse: string;
+//   driver?: string;
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export interface Driver {
+  driver_id?: number;
+  id?: number;
+  name?: string;
+  driver_name?: string;
+  phone?: string;
+  driver_phone?: string;
+  email?: string;
+  driver_email?: string;
+  [key: string]: any;
+}
+
+
+
+async function loadInitialOrders(){
+    try{
+
+        const user = await fetch("http://10.23.1.254:3000/api/orders");
+        if(user.ok){
+            const data = await user.json();
+            console.log(data)
+            return data as Order[];
+        }else{
+            throw new Error("Failed to fetch orders: " + user.statusText);
+        }               
+    }catch(error){
+        console.error("Error fetching orders:", error);
+        return [];
+    }
+}
+
+
+async function updateDriver(orderId , driverId){
+    try{
+
+        const order = await fetch(`http://10.23.1.254:3000/api/orders/${orderId}` , {
+            method :"PUT",
+            body: JSON.stringify({
+                driver_id : driverId,
+                status: driverId ? "IN_TRANSIT" : "CREATED",
+
+            }),
+            headers : {
+                "Content-Type" : "application/json"
+            }
+        });
+          
+    }catch(error){
+        console.error("Error fetching drivers:", error);
+        return [];
+    }
+}
+
+
+async function loadInitialDrivers(){
+    try{
+
+        const user = await fetch("http://10.23.1.254:3000/api/drivers");
+        if(user.ok){
+            const data = await user.json();
+            console.log("Drivers data:", data)
+            return data as Driver[];
+        }else{
+            throw new Error("Failed to fetch drivers: " + user.statusText);
+        }               
+    }catch(error){
+        console.error("Error fetching drivers:", error);
+        return [];
+    }
+}
+
+// Helper functions to extract driver properties (handles different API response formats)
+function getDriverId(driver: Driver): string | number {
+    return driver.id ?? driver.driver_id ?? '';
+}
+
+function getDriverName(driver: Driver): string {
+    return driver.name ?? driver.driver_name ?? 'Unknown';
+}
+
+function getDriverPhone(driver: Driver): string {
+    return driver.phone ?? driver.driver_phone ?? '';
+}
+
+
+
+
+
+// Mock driver data
+const drivers = []
+
+
+
+const getColumns = (
+    assignedDrivers: Record<string, string | null>,
+    onAssignDriver: (orderId: string, driverId: string | null) => void,
+    drivers: any[] = []
+): ColumnDef<Order>[] => [
     {
         id: "select",
         header: ({ table }) => (
@@ -140,6 +212,60 @@ export const columns: ColumnDef<Payment>[] = [
         },
     },
     {
+        accessorKey: "assignedDriver",
+        header: "Assigned Driver",
+        cell: ({ row }) => {
+            const order = row.original
+            const assignedDriverId = assignedDrivers[order.order_id]
+            const assignedDriver = drivers.length > 0 ? drivers.find(d => String(getDriverId(d)) === String(assignedDriverId)) : null
+
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            {assignedDriver ? getDriverName(assignedDriver) : "Assign Driver"}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                        <DropdownMenuLabel>Select Driver</DropdownMenuLabel>
+                        {drivers.length > 0 ? (
+                            drivers.map((driver) => (
+                                <DropdownMenuItem
+                                    key={String(getDriverId(driver))}
+                                    onClick={() => {
+                                        onAssignDriver(String(order.order_id), String(getDriverId(driver)))
+                                    }}
+                                >
+                                    <div className="flex flex-col">
+                                        <span>{getDriverName(driver)}</span>
+                                        <span className="text-xs text-gray-500">{getDriverPhone(driver)}</span>
+                                    </div>
+                                </DropdownMenuItem>
+                            ))
+                        ) : (
+                            <DropdownMenuItem disabled>
+                                <span className="text-gray-500">No drivers available</span>
+                            </DropdownMenuItem>
+                        )}
+                        {assignedDriver && (
+                            <>
+                                <DropdownMenuLabel className="text-xs mt-2">Actions</DropdownMenuLabel>
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        onAssignDriver(order.order_id, null)
+                                    }}
+                                    className="text-red-600"
+                                >
+                                    Unassign Driver
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )
+        },
+    },
+    {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
@@ -157,9 +283,9 @@ export const columns: ColumnDef<Payment>[] = [
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(payment.id)}
+                                onClick={() => navigator.clipboard.writeText(order.order_id)}
                             >
-                                Copy payment ID
+                                Copy Order ID
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuGroup>
@@ -189,9 +315,65 @@ export default function WareHouseDashboardHome() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+    
+    // State for orders and drivers data
+    const [orders, setOrders] = React.useState<Order[]>([])
+    const [driversData, setDriversData] = React.useState<Driver[]>([])
+    const [loading, setLoading] = React.useState(true)
+    
+    // State for assigned drivers
+    const [assignedDrivers, setAssignedDrivers] = React.useState<Record<string, string | null>>({
+        "3u1reuv4": "1",
+        "5kma53ae": "2",
+    })
+
+
+    const [driver , setDriver] = React.useState<Driver | null>(null)
+
+
+    // Load initial data on mount
+    React.useEffect(() => {
+        const loadData = async () => {
+            try {
+                setLoading(true)
+                const [ordersResult, driversResult] = await Promise.all([
+                    loadInitialOrders(),
+                    loadInitialDrivers()
+                ])
+                setOrders(ordersResult)
+                setDriversData(driversResult)
+            } catch (error) {
+                console.error("Error loading data:", error)
+                setOrders([])
+                setDriversData([])
+            } finally {
+                setLoading(false)
+            }
+        }
+        
+        loadData()
+    }, [])
+
+    const handleAssignDriver = (orderId: string, driverId: string | null) => {
+        setDriver(driversData.find(d => String(getDriverId(d)) === String(driverId)) || null);
+        setAssignedDrivers(prev => ({
+            ...prev,
+            [orderId]: driverId
+        }))
+        updateDriver(orderId , driverId).then(() => {alert("Driver assignment updated successfully!")}).catch(error => {
+            console.error("Error updating driver assignment:", error);
+            alert("Failed to update driver assignment: " + error.message);
+        });
+    }
+
+    // Get columns with current state
+    const columns = React.useMemo(
+        () => getColumns(assignedDrivers, handleAssignDriver, driversData),
+        [assignedDrivers, driversData]
+    )
 
     const table = useReactTable({
-        data,
+        data: orders,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -219,6 +401,13 @@ export default function WareHouseDashboardHome() {
             <Separator />
         </div>
 
+        {loading && (
+            <div className="m-10 text-center">
+                <p className="text-lg text-gray-600">Loading orders and drivers...</p>
+            </div>
+        )}
+
+        {!loading && (
         <div className="w-[90%] m-10 mt-0npx shadcn@latest add drawer">
             <div className="flex items-center py-4">
                 <Input
@@ -333,6 +522,7 @@ export default function WareHouseDashboardHome() {
                 </div>
             </div>
         </div>
+        )}
 
     </>
 }

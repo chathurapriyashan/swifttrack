@@ -99,11 +99,11 @@ export function DailyRoute({ orders, onNavigateRoute }: DailyRouteProps) {
                       )}
                     </div>
                     <p className={`text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {order.address.street}
+                      {order.delivery_address}
                     </p>
-                    <p className={`text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {/* <p className={`text-xs ${isCompleted ? 'text-gray-400' : 'text-gray-600'}`}>
                       {order.address.city}, {order.address.zip}
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               );
