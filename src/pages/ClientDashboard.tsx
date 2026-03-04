@@ -14,9 +14,16 @@ ws.onopen = () => {
   }));
 }
 
+import Swal from "sweetalert2"
 
 ws.onmessage = (event) => {
   const message = JSON.parse(event.data);
+  Swal.fire({
+    title: 'New Notification',
+    text: message.data.message,
+    icon: 'info',
+    confirmButtonText: 'OK'
+  });
   console.log('Received WebSocket message:', message);
 }
 

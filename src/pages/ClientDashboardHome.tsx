@@ -39,47 +39,20 @@ import {
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 
-const data: Payment[] = [
-    // {
-    //     id: "m5gr84i9",
-    //     amount: 316,
-    //     status: "success",
-    //     email: "ken99@example.com",
-    // },
-    // {
-    //     id: "3u1reuv4",
-    //     amount: 242,
-    //     status: "success",
-    //     email: "Abe45@example.com",
-    // },
-    // {
-    //     id: "derv1ws0",
-    //     amount: 837,
-    //     status: "processing",
-    //     email: "Monserrat44@example.com",
-    // },
-    // {
-    //     id: "5kma53ae",
-    //     amount: 874,
-    //     status: "success",
-    //     email: "Silas22@example.com",
-    // },
-    // {
-    //     id: "bhqecj4p",
-    //     amount: 721,
-    //     status: "failed",
-    //     email: "carmella@example.com",
-    // },
-]
 
-export type Payment = {
-    id: string
-    amount: number
-    status: "pending" | "processing" | "success" | "failed"
-    email: string
+
+
+export type Order = {
+    order_id: number
+    client_id: number
+    client_name: string
+    delivery_address: string
+    status: "pending" | "processing" | "IN_TRANSIT" | "completed" | "cancelled"
+    driver_id: number | null
+    warehouse_id: number | null
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Order>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -103,6 +76,35 @@ export const columns: ColumnDef<Payment>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: "order_id",
+        header: "Order ID",
+        cell: ({ row }) => (
+            <div className="font-medium">#{row.getValue("order_id")}</div>
+        ),
+    },
+    {
+        accessorKey: "client_name",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Client Name
+                    <ArrowUpDown />
+                </Button>
+            )
+        },
+        cell: ({ row }) => <div>{row.getValue("client_name")}</div>,
+    },
+    {
+        accessorKey: "delivery_address",
+        header: "Delivery Address",
+        cell: ({ row }) => (
+            <div className="max-w-xs truncate">{row.getValue("delivery_address")}</div>
+        ),
+    },
+    {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => (
@@ -110,40 +112,17 @@ export const columns: ColumnDef<Payment>[] = [
         ),
     },
     {
-        accessorKey: "email",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Email
-                    <ArrowUpDown />
-                </Button>
-            )
-        },
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
-    },
-    {
-        accessorKey: "amount",
-        header: () => <div className="text-right">Amount</div>,
-        cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("amount"))
-
-            // Format the amount as a dollar amount.
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(amount)
-
-            return <div className="text-right font-medium">{formatted}</div>
-        },
+        accessorKey: "driver_id",
+        header: "Driver ID",
+        cell: ({ row }) => (
+            <div>{row.getValue("driver_id") || "-"}</div>
+        ),
     },
     {
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const payment = row.original
+            const order = row.original
 
             return (
                 <DropdownMenu>
@@ -157,14 +136,14 @@ export const columns: ColumnDef<Payment>[] = [
                         <DropdownMenuGroup>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(payment.id)}
+                                onClick={() => navigator.clipboard.writeText(order.order_id.toString())}
                             >
-                                Copy payment ID
+                                Copy Order ID
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
-                                <a href="/users/orders">View Order</a>
+                                <a href={`/users/orders/${order.order_id}`}>View Order Details</a>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                     </DropdownMenuContent>
@@ -179,6 +158,8 @@ export const columns: ColumnDef<Payment>[] = [
 
 
 export default function ClientDashboardHome() {
+    const [data, setData] = React.useState<Order[]>([])
+    const [loading, setLoading] = React.useState(true)
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
@@ -186,6 +167,41 @@ export default function ClientDashboardHome() {
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})
+
+    // Fetch orders from server
+    React.useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                setLoading(true)
+                const clientId = Number(localStorage.getItem("id"))
+                
+                const response = await fetch("http://localhost:3000/api/orders")
+                if (!response.ok) {
+                    throw new Error("Failed to fetch orders")
+                }
+                
+                const allOrders = await response.json()
+
+                console.log("All orders fetched from server:", allOrders)
+                
+                // Filter orders by client_id
+                const filteredOrders = allOrders.filter(
+                    (order: any) => order.client_id === clientId
+                )
+
+                console.log("Filtered orders for client_id", clientId, ":", filteredOrders)
+                
+                setData(filteredOrders)
+            } catch (error) {
+                console.error("Error fetching orders:", error)
+                setData([])
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchOrders()
+    }, [])
 
     const table = useReactTable({
         data,
@@ -216,13 +232,18 @@ export default function ClientDashboardHome() {
             <Separator />
         </div>
 
-        <div className="w-[90%] m-10 mt-0npx shadcn@latest add drawer">
+        {loading ? (
+            <div className="w-[90%] m-10 mt-0 text-center">
+                <p>Loading orders...</p>
+            </div>
+        ) : (
+            <div className="w-[90%] m-10 mt-0npx shadcn@latest add drawer">
             <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+                    placeholder="Filter by client name..."
+                    value={(table.getColumn("client_name")?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
+                        table.getColumn("client_name")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
@@ -329,7 +350,8 @@ export default function ClientDashboardHome() {
                     </Button>
                 </div>
             </div>
-        </div>
+            </div>
+        )}
 
     </>
 }

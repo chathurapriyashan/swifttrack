@@ -83,7 +83,7 @@ export default function CreateOrderFrom() {
         "Content-Type" : "application/json",
       },
       body : JSON.stringify({
-          client_id : 1 , 
+          client_id : localStorage.getItem("id") , 
           products: selectedProducts.map(product=>({id: product.id , quantity: product.quantity})),
           client_name : orderName , 
           delivery_address : `${deliveryAddress.street} , ${deliveryAddress.city} , ${deliveryAddress.state} , ${deliveryAddress.zip}`,
