@@ -67,7 +67,7 @@ async function loadInitialUsers(){
         if(user.ok){
             const data = await user.json();
             if(data && data.clients){
-              return data.clients as User[];
+              return data.clients.client as User[];
             }else return [];
         }else{
             throw new Error("Failed to fetch users: " + user.statusText);
@@ -97,8 +97,8 @@ export default function AdminUsers() {
   console.log("Current users state:", users);
 
   const filteredUsers = users?.filter(user =>
-    user?.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user?.Email.toLowerCase().includes(searchTerm.toLowerCase())
+    user?.Name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+    user?.Email?.toLowerCase()?.includes(searchTerm.toLowerCase())
   );
 
   const handleCreate = () => {

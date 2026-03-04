@@ -7,6 +7,23 @@ import WareHouseSidebar from './components/WareHouseSideBar';
 import { SidebarProvider } from '../components/ui/sidebar';
 
 
+const ws = new WebSocket('ws://localhost:3008');
+ws.onopen = () => {
+  console.log('WebSocket connection established');
+  ws.send(JSON.stringify({ 
+    type: 'register', 
+    clientType: 'client', 
+    userId: localStorage.getItem('id') 
+  }));
+}
+
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  console.log('Received WebSocket message:', message);
+}
+
+
 
 export interface Driver {
   id: number;
@@ -20,47 +37,47 @@ export interface Driver {
 
 // Mock initial drivers
 const initialDrivers: Driver[] = [
-  { 
-    id: 1, 
-    name: 'Michael Chen', 
-    phone: '+1 (555) 123-4567', 
-    vehicle: 'Toyota Prius - ABC 123', 
+  {
+    id: 1,
+    name: 'Michael Chen',
+    phone: '+1 (555) 123-4567',
+    vehicle: 'Toyota Prius - ABC 123',
     available: true,
     license: 'DL-1234567',
     email: 'michael.chen@delivery.com'
   },
-  { 
-    id: 2, 
-    name: 'Sarah Johnson', 
-    phone: '+1 (555) 234-5678', 
-    vehicle: 'Honda Civic - XYZ 789', 
+  {
+    id: 2,
+    name: 'Sarah Johnson',
+    phone: '+1 (555) 234-5678',
+    vehicle: 'Honda Civic - XYZ 789',
     available: true,
     license: 'DL-2345678',
     email: 'sarah.johnson@delivery.com'
   },
-  { 
-    id: 3, 
-    name: 'David Martinez', 
-    phone: '+1 (555) 345-6789', 
-    vehicle: 'Tesla Model 3 - DEF 456', 
+  {
+    id: 3,
+    name: 'David Martinez',
+    phone: '+1 (555) 345-6789',
+    vehicle: 'Tesla Model 3 - DEF 456',
     available: true,
     license: 'DL-3456789',
     email: 'david.martinez@delivery.com'
   },
-  { 
-    id: 4, 
-    name: 'Emily Rodriguez', 
-    phone: '+1 (555) 456-7890', 
-    vehicle: 'Ford Transit - GHI 012', 
+  {
+    id: 4,
+    name: 'Emily Rodriguez',
+    phone: '+1 (555) 456-7890',
+    vehicle: 'Ford Transit - GHI 012',
     available: false,
     license: 'DL-4567890',
     email: 'emily.rodriguez@delivery.com'
   },
-  { 
-    id: 5, 
-    name: 'James Wilson', 
-    phone: '+1 (555) 567-8901', 
-    vehicle: 'Nissan Leaf - JKL 345', 
+  {
+    id: 5,
+    name: 'James Wilson',
+    phone: '+1 (555) 567-8901',
+    vehicle: 'Nissan Leaf - JKL 345',
     available: true,
     license: 'DL-5678901',
     email: 'james.wilson@delivery.com'
@@ -86,8 +103,8 @@ export default function Drivers() {
   const handleSaveDriver = (driverData: Omit<Driver, 'id'>) => {
     if (editingDriver) {
       // Update existing driver
-      setDrivers(drivers.map(d => 
-        d.id === editingDriver.id 
+      setDrivers(drivers.map(d =>
+        d.id === editingDriver.id
           ? { ...driverData, id: editingDriver.id }
           : d
       ));
@@ -121,46 +138,46 @@ export default function Drivers() {
   };
 
   return <SidebarProvider>
-        <WareHouseSidebar />
-        <main className="flex flex-col w-full">
-          <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto p-6 md:p-12">
-        <DriversHeader 
-          onCreateDriver={handleCreateDriver}
-          totalDrivers={drivers.length}
-          availableDrivers={drivers.filter(d => d.available).length}
+    <WareHouseSidebar />
+    <main className="flex flex-col w-full">
+      <div className="min-h-screen bg-white">
+        <div className="max-w-6xl mx-auto p-6 md:p-12">
+          <DriversHeader
+            onCreateDriver={handleCreateDriver}
+            totalDrivers={drivers.length}
+            availableDrivers={drivers.filter(d => d.available).length}
           />
-        
-        <div className="mt-12">
-          {showForm ? (
-            <DriverForm
-            driver={editingDriver}
-            onSave={handleSaveDriver}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingDriver(null);
-            }}
-            />
-          ) : (
-            <DriversList
-            drivers={drivers}
-            onEdit={handleEditDriver}
-            onDelete={handleDeleteDriver}
-            onToggleAvailability={handleToggleAvailability}
+
+          <div className="mt-12">
+            {showForm ? (
+              <DriverForm
+                driver={editingDriver}
+                onSave={handleSaveDriver}
+                onCancel={() => {
+                  setShowForm(false);
+                  setEditingDriver(null);
+                }}
+              />
+            ) : (
+              <DriversList
+                drivers={drivers}
+                onEdit={handleEditDriver}
+                onDelete={handleDeleteDriver}
+                onToggleAvailability={handleToggleAvailability}
+              />
+            )}
+          </div>
+
+          {deletingDriver && (
+            <DeleteConfirmation
+              driver={deletingDriver}
+              onConfirm={confirmDelete}
+              onCancel={() => setDeletingDriver(null)}
             />
           )}
         </div>
-
-        {deletingDriver && (
-          <DeleteConfirmation
-          driver={deletingDriver}
-          onConfirm={confirmDelete}
-          onCancel={() => setDeletingDriver(null)}
-          />
-        )}
       </div>
-    </div>
-        </main>
-      </SidebarProvider>
+    </main>
+  </SidebarProvider>
 
 }

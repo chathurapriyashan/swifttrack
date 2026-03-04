@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 
-const LoginPage: React.FC = ({user , setUser}) => {
+const LoginPage: React.FC = ({ user, setUser }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +33,37 @@ const LoginPage: React.FC = ({user , setUser}) => {
         console.log("Google login successful:", { email, name, picture });
 
         // You can now send this data to your backend for authentication
+        console.log("Sending user data to backend for authentication...");
+        const user = await fetch("http://localhost:3000/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client: {
+              Name: name,
+              Email: email,
+              Address: { street: '123 Main St', city: 'Colombo', country: 'Sri Lanka' },
+              Contact: '0712345678',
+              Role: 'client',
+            }
+          }),
+        })
+
+
+        const userData = await user.json();
+        console.log("User data from backend:", userData);
+        setUser(userData);
+        localStorage.setItem("id", userData.id);
+        localStorage.setItem("access_token", codeResponse.access_token);
         // await loginWithGoogle({ email, picture, accessToken: codeResponse.access_token });
+        if (userData.role === "client") {
+          navigate("/users");
+        } else if (userData.role === "warehouse") {
+          navigate("/warehouse");
+        } else if (userData.role === "driver") {
+          navigate("/drivers");
+        }
 
         // Navigate to dashboard
         navigate("/users");
@@ -182,18 +212,54 @@ export const SignupPage: React.FC = ({ setUser }: { setUser: any }) => {
         );
 
         const { email, name, picture } = response.data;
-        
+
         // Store access token in localStorage
         localStorage.setItem('access_token', codeResponse.access_token);
-        
+
         // Update user state
         setUser({
           email,
           name,
           image: picture,
         });
-        
-        console.log("Google signup successful:", { email, name, picture });
+
+        // You can now send this data to your backend for authentication
+        console.log("Sending user data to backend for authentication...");
+        const user = await fetch("http://localhost:3000/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client: {
+              Name: name,
+              Email: email,
+              Address: { street: '123 Main St', city: 'Colombo', country: 'Sri Lanka' },
+              Contact: '0712345678',
+              Role: 'client',
+            }
+          }),
+        })
+
+
+        const userData = await user.json();
+        console.log("User data from backend:", userData);
+
+        if(userData.error){
+          alert(userData.error);
+          return;
+        }
+        setUser(userData);
+        localStorage.setItem("id", userData.id);
+        localStorage.setItem("access_token", codeResponse.access_token);
+        // await loginWithGoogle({ email, picture, accessToken: codeResponse.access_token });
+        if (userData.role === "client") {
+          navigate("/users");
+        } else if (userData.role === "warehouse") {
+          navigate("/warehouse");
+        } else if (userData.role === "driver") {
+          navigate("/drivers");
+        }
 
         // You can now send this data to your backend
         // await registerWithGoogle({ email, name, picture, accessToken: codeResponse.access_token });

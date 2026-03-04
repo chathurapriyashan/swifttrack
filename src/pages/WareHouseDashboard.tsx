@@ -7,8 +7,36 @@ import WareHouseSidebar from "./components/WareHouseSideBar"
 
 
 
-export default function WareHouseDashboard({ children }: { children: React.ReactNode }){
-    return (
+
+const ws = new WebSocket('ws://localhost:3008/register');
+ws.onopen = () => {
+  console.log('WebSocket connection established');
+  ws.send(JSON.stringify({
+    type: 'register',
+    clientType: 'client',
+    userId: localStorage.getItem('id') || 1,
+  }));
+
+}
+
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if(message.data.message == undefined) return;
+  alert(message.data.message);
+}
+
+
+export default function WareHouseDashboard({ children }: {
+  children: React.ReactNode
+}) {
+
+
+
+
+
+
+  return (
     <SidebarProvider>
       <WareHouseSidebar />
       <main className="flex flex-col w-full">

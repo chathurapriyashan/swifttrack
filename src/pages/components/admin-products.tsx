@@ -57,7 +57,6 @@ async function deleteProduct({productId}: {productId: number}){
 
 
 async function createProduct(productData: Omit<Product, 'id'>) {
-    console.log('Creating product:', productData);
   
     try {
       const response = await fetch("http://10.23.1.254:3000/api/products/new", {
@@ -65,7 +64,10 @@ async function createProduct(productData: Omit<Product, 'id'>) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(productData),
+        body: JSON.stringify({
+          name :productData.name,
+          price: productData.price
+        }),
       });
   
       if (response.ok) {

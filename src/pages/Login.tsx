@@ -30,18 +30,43 @@ const LoginPage: React.FC = ({user , setUser}) => {
         );
 
         const { email, name, picture } = response.data;
-        
+
+
         // Store access token in localStorage
         localStorage.setItem('access_token', codeResponse.access_token);
-        
-        setUser({email , name , image : picture});
-        console.log("Google login successful:", { email, name, picture });
+
+        // Update user state
+        setUser({
+          email,
+          name,
+          image: picture,
+        });
 
         // You can now send this data to your backend for authentication
-        // await loginWithGoogle({ email, picture, accessToken: codeResponse.access_token });
+        console.log("Sending user data to backend for authentication...");
+        const user = await fetch("http://localhost:3000/api/users" );
+        const userData = await user.json();
+        const [client] = userData.clients.client.filter((u: any) => u.Email === email);
+        console.log("User data received from backend:", client);
 
-        // Navigate to dashboard
-        navigate("/users");
+        if(client == undefined) {
+          alert("User not registered. Please sign up first.");
+          setLoading(false);
+          return;
+        }
+
+        setUser(client);
+        localStorage.setItem("id", client.ClientID);
+        localStorage.setItem("access_token", codeResponse.access_token);
+        // await loginWithGoogle({ email, picture, accessToken: codeResponse.access_token });
+        if (client.Role === "client") {
+          navigate("/users");
+        } else if (client.Role === "warehouse") {
+          navigate("/warehouse");
+        } else if (client.Role === "driver") {
+          navigate("/drivers");
+        }
+
       } catch (error) {
         console.error("Error getting user info:", error);
       } finally {
